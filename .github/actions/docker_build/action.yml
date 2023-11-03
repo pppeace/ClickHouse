@@ -1,0 +1,43 @@
+name: 'Docker Build'
+description: 'Build Ddocker image'
+inputs:
+  arch:
+    required: true
+  name:
+    required: true
+  tag:
+    required: true
+  job_digest:
+    required: true
+  dockerfile_path:
+    required: true
+  flag_on_s3:
+    description: creates file-flag on S3 on success with provided path including file name
+    required: false
+    default: ""
+runs:
+  using: "composite"
+  steps:
+    - name: Set envs
+      shell: bash
+      run: |
+        cat >> "$GITHUB_ENV" << 'EOF'
+        ARCH=${{ inputs.arch }}
+        IMAGE_NAME=${{ inputs.name }}
+        IMAGE_TAG=${{ inputs.tag }}
+        DOCKER_JOB_DIGEST=${{ inputs.job_digest }}
+        DOCKERFILE_PATH=${{ inputs.dockerfile_path }}
+        IMAGE_TAG_OLDSCOOL=0-${{ github.event.after }}
+        EOF
+    - name: Build image
+      shell: bash
+      run: |
+        docker buildx build --builder default --label build-url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} \
+          --build-arg CACHE_INVALIDATOR=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} \
+          --tag "clickhouse/$IMAGE_NAME:$IMAGE_TAG-$ARCH" \
+          --cache-from type=registry,ref="clickhouse/${IMAGE_NAME}:latest" --cache-to type=inline,mode=max --push --progress plain "$DOCKERFILE_PATH"
+    - name: Set a File flag
+      shell: bash
+      run: |
+        # Upload file-flag if path was provided
+        [ -n "${{ inputs.flag_on_s3 }}" ] && echo "$IMAGE_TAG" > tmp.txt && aws s3 cp tmp.txt s3://${{ inputs.flag_on_s3 }} && rm tmp.txt
