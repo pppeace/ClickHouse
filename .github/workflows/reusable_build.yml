@@ -18,6 +18,10 @@ name: Build ClickHouse
       additional_envs:
         description: additional ENV variables to setup the job
         type: string
+      sparse_checkout:
+        description: if the sparse checkout should be applied
+        type: boolean
+        default: false
 
 jobs:
   Build:
@@ -45,6 +49,14 @@ jobs:
           submodules: true
           fetch-depth: ${{inputs.checkout_depth}}
           filter: tree:0
+      - name: Apply sparse checkout for contrib # in order to check that it doesn't break build
+        if: ${{ inputs.sparse_checkout }}
+        run: |
+          rm -rf "$GITHUB_WORKSPACE/contrib" && echo 'removed'
+          git -C "$GITHUB_WORKSPACE" checkout .  && echo 'restored'
+          "$GITHUB_WORKSPACE/contrib/update-submodules.sh" && echo 'OK'
+          du -hs "$GITHUB_WORKSPACE/contrib" ||:
+          find "$GITHUB_WORKSPACE/contrib" -type f | wc -l ||:
       - name: Build
         run: |
           sudo rm -fr "$TEMP_PATH"
