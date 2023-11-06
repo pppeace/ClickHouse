@@ -14,6 +14,7 @@ name: Build ClickHouse
       runner_type:
         description: the label of runner to use
         default: builder
+        type: string
 
 jobs:
   Build:
