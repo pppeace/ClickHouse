@@ -246,7 +246,7 @@ jobs:
 #################################### ORDINARY BUILDS ####################################
 #########################################################################################
   BuilderDebRelease:
-    uses: ./.github/actions/build.yml
+    uses: ./.github/workflows/reusable_build.yml
     with:
       checkout_depth: 0
       build_name: package_release

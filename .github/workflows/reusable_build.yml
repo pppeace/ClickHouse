@@ -15,6 +15,9 @@ name: Build ClickHouse
         description: the label of runner to use
         default: builder
         type: string
+      additional_envs:
+        description: additional ENV variables to setup the job
+        type: string
 
 jobs:
   Build:
