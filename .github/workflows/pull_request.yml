@@ -262,7 +262,7 @@ jobs:
     needs: [FastTest, StyleCheck]
     uses: ./.github/workflows/reusable_build.yml
     with:
-      build_name: package_release
+      build_name: binary_release
   BuilderDebAsan:
     needs: [FastTest, StyleCheck]
     uses: ./.github/workflows/reusable_build.yml
