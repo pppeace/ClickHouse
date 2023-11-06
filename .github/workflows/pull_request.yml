@@ -246,6 +246,7 @@ jobs:
 #################################### ORDINARY BUILDS ####################################
 #########################################################################################
   BuilderDebRelease:
+    needs: [FastTest, StyleCheck]
     uses: ./.github/workflows/reusable_build.yml
     with:
       checkout_depth: 0
