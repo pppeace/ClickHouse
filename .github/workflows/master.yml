@@ -229,8 +229,7 @@ jobs:
     needs: [DockerHubPush]
     uses: ./.github/workflows/reusable_build.yml
     with:
-      checkout_depth: 0
-          BUILD_NAME=binary_tidy
+      build_name: binary_tidy
   BuilderBinDarwin:
     needs: [DockerHubPush]
     uses: ./.github/workflows/reusable_build.yml
