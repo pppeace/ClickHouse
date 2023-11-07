@@ -1,0 +1,23 @@
+name: Common setup and cleaning
+description: Setup necessary environments and clean the runner's temp path on ending
+inputs:
+  job_type:
+    description: the name to use in the TEMP_PATH and REPO_COPY
+    default: common
+    type: string
+runs:
+  using: composite
+  steps:
+    - name: Setup and post-clean
+      using: ./.github/actions/with-post-step
+      with:
+        main: |
+          echo "Setup the common ENV variables"
+          cat >> "$GITHUB_ENV" << 'EOF'
+          TEMP_PATH=${{runner.temp}}/${{inputs.job_type}}
+          REPO_COPY=${{runner.temp}}/${{inputs.job_type}}/${{github.repository.name}}
+          EOF
+        post: |
+          docker ps --quiet | xargs --no-run-if-empty docker kill ||:
+          docker ps --all --quiet | xargs --no-run-if-empty docker rm -f ||:
+          sudo rm -fr "${{runner.temp}}"

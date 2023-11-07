@@ -1,3 +1,6 @@
+### For the pure soul wishes to move it to another place
+# https://github.com/orgs/community/discussions/9050
+
 name: Build ClickHouse
 'on':
   workflow_call:
@@ -25,23 +28,9 @@ name: Build ClickHouse
 
 jobs:
   Build:
-    name: build-${{inputs.build_name}}
+    name: Build-${{inputs.build_name}}
     runs-on: [self-hosted, '${{inputs.runner_type}}']
     steps:
-      - name: Set envs
-        run: |
-          cat >> "$GITHUB_ENV" << 'EOF'
-          TEMP_PATH=${{runner.temp}}/build_check
-          IMAGES_PATH=${{runner.temp}}/images_path
-          REPO_COPY=${{runner.temp}}/build_check/ClickHouse
-          CACHES_PATH=${{runner.temp}}/../ccaches
-          BUILD_NAME=${{inputs.build_name}}
-          EOF
-      - name: Download changed images
-        uses: actions/download-artifact@v3
-        with:
-          name: changed_images
-          path: ${{ env.IMAGES_PATH }}
       - name: Check out repository code
         uses: ClickHouse/checkout@v1
         with:
@@ -49,6 +38,23 @@ jobs:
           submodules: true
           fetch-depth: ${{inputs.checkout_depth}}
           filter: tree:0
+      - name: Setup job
+        uses: ./.github/actions/common
+        with:
+          job_type: build_check
+      - name: Set envs
+        run: |
+          cat >> "$GITHUB_ENV" << 'EOF'
+          IMAGES_PATH=${{runner.temp}}/images_path
+          BUILD_NAME=${{inputs.build_name}}
+          GITHUB_JOB_OVERRIDDEN=build-${{inputs.build_name}}
+          ${{inputs.additional_envs}}
+          EOF
+      - name: Download changed images
+        uses: actions/download-artifact@v3
+        with:
+          name: changed_images
+          path: ${{ env.IMAGES_PATH }}
       - name: Apply sparse checkout for contrib # in order to check that it doesn't break build
         if: ${{ inputs.sparse_checkout }}
         run: |
@@ -69,9 +75,3 @@ jobs:
         with:
           name: ${{ env.BUILD_URLS }}
           path: ${{ env.TEMP_PATH }}/${{ env.BUILD_URLS }}.json
-      - name: Cleanup
-        if: always()
-        run: |
-          docker ps --quiet | xargs --no-run-if-empty docker kill ||:
-          docker ps --all --quiet | xargs --no-run-if-empty docker rm -f ||:
-          sudo rm -fr "$TEMP_PATH" "$CACHES_PATH"
