@@ -13,6 +13,7 @@ runs:
   using: "composite"
   steps:
     - name: Setup
+      shell: bash
       run: |
           echo "Setup the common ENV variables"
           cat >> "$GITHUB_ENV" << 'EOF'
