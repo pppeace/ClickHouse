@@ -47,7 +47,7 @@ jobs:
           ${{inputs.additional_envs}}
           EOF
       - name: Common setup
-        uses: ./.github/actions/common
+        uses: ./.github/actions/common_setup
         with:
           job_type: build_check
       - name: Download changed images
@@ -75,3 +75,5 @@ jobs:
         with:
           name: ${{ env.BUILD_URLS }}
           path: ${{ env.TEMP_PATH }}/${{ env.BUILD_URLS }}.json
+      - name: Clean
+        uses: ./.github/actions/clean

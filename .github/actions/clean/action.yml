@@ -1,0 +1,10 @@
+name: Clean runner
+description: Setup necessary environments and clean the runner's temp path on ending
+runs:
+  using: "composite"
+  steps:
+    - name: Clean
+      run: |
+          docker ps --quiet | xargs --no-run-if-empty docker kill ||:
+          docker ps --all --quiet | xargs --no-run-if-empty docker rm -f ||:
+          sudo rm -fr "${{runner.temp}}"
