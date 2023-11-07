@@ -5,11 +5,15 @@ inputs:
     description: the name to use in the TEMP_PATH and REPO_COPY
     default: common
     type: string
+  nested_job:
+    description: the fuse for unintended use inside of the reusable callable jobs
+    default: true
+    type: boolean
 runs:
-  using: composite
+  using: "composite"
   steps:
     - name: Setup and post-clean
-      using: ./.github/actions/with-post-step
+      uses: ./.github/actions/with-post-step
       with:
         main: |
           echo "Setup the common ENV variables"
@@ -17,6 +21,10 @@ runs:
           TEMP_PATH=${{runner.temp}}/${{inputs.job_type}}
           REPO_COPY=${{runner.temp}}/${{inputs.job_type}}/${{github.repository.name}}
           EOF
+          if [ -z "${{env.GITHUB_JOB_OVERRIDDEN}}" ] && [ "true" == "${{inputs.nested_job}}" ]; then
+            echo "The GITHUB_JOB_OVERRIDDEN ENV is unset, and must be set for the nested jobs"
+            exit 1
+          fi
         post: |
           docker ps --quiet | xargs --no-run-if-empty docker kill ||:
           docker ps --all --quiet | xargs --no-run-if-empty docker rm -f ||:

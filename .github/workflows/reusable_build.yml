@@ -38,11 +38,7 @@ jobs:
           submodules: true
           fetch-depth: ${{inputs.checkout_depth}}
           filter: tree:0
-      - name: Setup job
-        uses: ./.github/actions/common
-        with:
-          job_type: build_check
-      - name: Set envs
+      - name: Set build envs
         run: |
           cat >> "$GITHUB_ENV" << 'EOF'
           IMAGES_PATH=${{runner.temp}}/images_path
@@ -50,6 +46,10 @@ jobs:
           GITHUB_JOB_OVERRIDDEN=build-${{inputs.build_name}}
           ${{inputs.additional_envs}}
           EOF
+      - name: Common setup
+        uses: ./.github/actions/common
+        with:
+          job_type: build_check
       - name: Download changed images
         uses: actions/download-artifact@v3
         with:
