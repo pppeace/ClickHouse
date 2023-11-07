@@ -264,7 +264,7 @@ jobs:
     with:
       build_name: binary_release
   BuilderDebAsan:
-    needs: [FastTest, StyleCheck]
+    needs: [DockerHubPush]
     uses: ./.github/workflows/reusable_build.yml
     with:
       build_name: package_asan
