@@ -21,10 +21,6 @@ name: Build ClickHouse
       additional_envs:
         description: additional ENV variables to setup the job
         type: string
-      sparse_checkout:
-        description: if the sparse checkout should be applied
-        type: boolean
-        default: false
 
 jobs:
   Build:
@@ -42,10 +38,10 @@ jobs:
         run: |
           cat >> "$GITHUB_ENV" << 'EOF'
           IMAGES_PATH=${{runner.temp}}/images_path
-          BUILD_NAME=${{inputs.build_name}}
           GITHUB_JOB_OVERRIDDEN=Build-${{inputs.build_name}}
           ${{inputs.additional_envs}}
           EOF
+          python3 "$GITHUB_WORKSPACE"/tests/ci/ci_config.py --build-name "${{inputs.build_name}}" >> "$GITHUB_ENV"
       - name: Common setup
         uses: ./.github/actions/common_setup
         with:
@@ -56,7 +52,7 @@ jobs:
           name: changed_images
           path: ${{ env.IMAGES_PATH }}
       - name: Apply sparse checkout for contrib # in order to check that it doesn't break build
-        if: ${{ inputs.sparse_checkout }}
+        if: ${{ env.BUILD_SPARSE_CHECKOUT == 'true' }}
         run: |
           rm -rf "$GITHUB_WORKSPACE/contrib" && echo 'removed'
           git -C "$GITHUB_WORKSPACE" checkout .  && echo 'restored'
