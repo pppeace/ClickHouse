@@ -43,7 +43,7 @@ jobs:
           cat >> "$GITHUB_ENV" << 'EOF'
           IMAGES_PATH=${{runner.temp}}/images_path
           BUILD_NAME=${{inputs.build_name}}
-          GITHUB_JOB_OVERRIDDEN=build-${{inputs.build_name}}
+          GITHUB_JOB_OVERRIDDEN=Build-${{inputs.build_name}}
           ${{inputs.additional_envs}}
           EOF
       - name: Common setup
