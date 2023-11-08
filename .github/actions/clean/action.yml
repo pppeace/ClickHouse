@@ -4,6 +4,7 @@ runs:
   using: "composite"
   steps:
     - name: Clean
+      shell: bash
       run: |
           docker ps --quiet | xargs --no-run-if-empty docker kill ||:
           docker ps --all --quiet | xargs --no-run-if-empty docker rm -f ||:
